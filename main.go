@@ -2,12 +2,15 @@ package main
 
 import (
 	"github.com/asim/go-micro/plugins/registry/nacos/v4"
+	//"github.com/asim/go-micro/plugins/registry/nacos/v4"
 	_ "github.com/asim/go-micro/plugins/registry/nacos/v4"
 	httpServer "github.com/asim/go-micro/plugins/server/http/v4"
 	"github.com/gin-gonic/gin"
 	"go-micro.dev/v4"
 	log "go-micro.dev/v4/logger"
 	"go-micro.dev/v4/server"
+	"helloworld/cache/handler"
+	pbcache "helloworld/cache/proto"
 )
 
 var (
@@ -16,21 +19,41 @@ var (
 )
 
 func main() {
-	/*	// Create service
-		srv := micro.NewService(
-			micro.Name(service),
-			micro.Version(version),
-		)
-		srv.Init()
+	log.Info("sssssssssssxxxxxxffffff")
+	/*&cli.StringFlag{
+		Name:    "registry",
+		EnvVars: []string{"MICRO_REGISTRY"},
+		Usage:   "Registry for discovery. etcd, mdns",
+	},
+		&cli.StringFlag{
+			Name:    "registry_address",
+			EnvVars: []string{"MICRO_REGISTRY_ADDRESS"},
+			Usage:   "Comma-separated list of registry addresses",
+		},*/
+	//	os.Setenv("MICRO_REGISTRY", "nacos")
+	//os.Setenv("MICRO_REGISTRY_ADDRESS", "192.168.144.17:8888")
 
-		// Register handler
-		pb.RegisterHelloworldHandler(srv.Server(), new(handler.Helloworld))
-		pb.RegisterGreeterHandler(srv.Server(),new(handler.Greeter))
-		// Run service
-		if err := srv.Run(); err != nil {
-			log.Fatal(err)
-		}*/
-	test()
+	// Create service
+	srv := micro.NewService(
+		micro.Name(service),
+		//micro.Version(version),
+		micro.Registry(nacos.NewRegistry(nacos.WithAddress([]string{"192.168.144.17:8888"}))),
+	)
+
+	srv.Init()
+
+	// Register handler
+	//pb.RegisterHelloworldHandler(srv.Server(), new(handler.Helloworld))
+	//pb.RegisterGreeterHandler(srv.Server(),new(handler.Greeter))
+	cache := handler.NewCache()
+	pbcache.RegisterCacheHandler(srv.Server(), cache)
+	// Run service
+	if err := srv.Run(); err != nil {
+		log.Fatal(err)
+	}
+
+	//test()
+
 }
 
 func test() {
@@ -79,7 +102,7 @@ func test() {
 	//var s=[]string{"192.168.144.17:8888"}
 	service := micro.NewService(
 		micro.Server(srv),
-		micro.Registry(nacos.NewRegistry()),
+		//micro.Registry(nacos.NewRegistry()),
 		//micro.Registry(nacos.NewRegistry(nacos.WithAddress([] string{"192.168.144.17:8888"}))),
 	)
 	service.Init()
